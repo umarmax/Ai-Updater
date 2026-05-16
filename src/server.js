@@ -279,7 +279,12 @@ if (missing.length) {
   );
 }
 
-app.listen(config.port, async () => {
-  console.log(`Listening on port ${config.port}`);
-  await registerTelegramWebhook();
+const host = "0.0.0.0";
+app.listen(config.port, host, async () => {
+  console.log(`Listening on http://${host}:${config.port}`);
+  try {
+    await registerTelegramWebhook();
+  } catch (err) {
+    console.error("[webhook] registration error:", err);
+  }
 });
