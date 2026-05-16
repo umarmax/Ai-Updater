@@ -1,0 +1,21 @@
+{
+  "name": "ai-updater-pro",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Telegram group bot + Mini App: driver slang to TMS JSON, human-in-the-loop, optional Google Sheets / Samsara.",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "set-webhook": "node scripts/set-webhook.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "googleapis": "^144.0.0",
+    "openai": "^4.73.0"
+  }
+}

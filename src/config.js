@@ -1,0 +1,46 @@
+import "dotenv/config";
+
+function parseIdList(raw) {
+  if (!raw || !String(raw).trim()) return [];
+  return String(raw)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => Number(s));
+}
+
+export const config = {
+  telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || "",
+  telegramWebhookSecret: process.env.TELEGRAM_WEBHOOK_SECRET || "",
+  openaiApiKey: process.env.OPENAI_API_KEY || "",
+  openaiModel: process.env.OPENAI_MODEL || "gpt-4o",
+  allowedDriverTelegramIds: new Set(
+    parseIdList(process.env.ALLOWED_DRIVER_TELEGRAM_IDS)
+  ),
+  allowedGroupChatId: process.env.ALLOWED_GROUP_CHAT_ID
+    ? Number(process.env.ALLOWED_GROUP_CHAT_ID)
+    : null,
+  confidenceThreshold: Number(process.env.CONFIDENCE_THRESHOLD || 85),
+  dispatcherChatId: process.env.DISPATCHER_CHAT_ID
+    ? Number(process.env.DISPATCHER_CHAT_ID)
+    : null,
+  publicBaseUrl: (process.env.PUBLIC_BASE_URL || "").replace(/\/$/, ""),
+  port: Number(process.env.PORT || 8787),
+  googleSheetId: process.env.GOOGLE_SHEET_ID || "",
+  googleSheetTab: process.env.GOOGLE_SHEET_TAB || "Loads",
+  googleAuditTab: process.env.GOOGLE_AUDIT_TAB || "Audit",
+  googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS || "",
+  samsaraApiToken: process.env.SAMSARA_API_TOKEN || "",
+};
+
+export function assertConfig() {
+  const missing = [];
+  if (!config.telegramBotToken) missing.push("TELEGRAM_BOT_TOKEN");
+  if (!config.openaiApiKey) missing.push("OPENAI_API_KEY");
+  if (config.allowedDriverTelegramIds.size === 0) {
+    missing.push("ALLOWED_DRIVER_TELEGRAM_IDS");
+  }
+  if (!config.dispatcherChatId) missing.push("DISPATCHER_CHAT_ID");
+  if (!config.publicBaseUrl) missing.push("PUBLIC_BASE_URL");
+  return missing;
+}
