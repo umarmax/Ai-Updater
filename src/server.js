@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import { config, assertConfig } from "./config.js";
+import { config, assertConfig, configStatus } from "./config.js";
 import { parseDriverMessage } from "./openai-parse.js";
 import { telegramApi, verifyWebhookSecret } from "./telegram.js";
 import { logAuditRow, applyStatusUpdate } from "./sheets.js";
@@ -25,13 +25,32 @@ app.use(express.json({ limit: "512kb" }));
 app.use("/public", express.static(path.join(__dirname, "..", "public")));
 
 app.get("/health", (_req, res) => {
-  res.json({ ok: true, service: "ai-updater-pro" });
+  const status = configStatus();
+  res.json({
+    ok: true,
+    service: "ai-updater-pro",
+    ready: status.ready,
+  });
+});
+
+app.get("/status", (_req, res) => {
+  res.json(configStatus());
 });
 
 app.get("/", (_req, res) => {
+  const s = configStatus();
+  const missingList = s.missing.length
+    ? `<ul>${s.missing.map((m) => `<li>${m}</li>`).join("")}</ul>`
+    : "<p><strong>All required settings OK.</strong> Test your bot in Telegram.</p>";
+  const url = s.publicBaseUrl || "(no public URL yet)";
   res.type("html").send(`<!doctype html><meta charset="utf-8">
   <title>AI Updater Pro</title>
-  <p>Server is running. Open the Telegram Mini App from your bot button, or POST webhooks to <code>/telegram/webhook</code>.</p>`);
+  <h1>Server is running</h1>
+  <p>Public URL: <code>${url}</code></p>
+  <p>JSON status: <a href="/status">/status</a> · health: <a href="/health">/health</a></p>
+  <h2>Configuration</h2>
+  ${missingList}
+  <p>Add missing items in Railway → <strong>Ai-Updater</strong> service → <strong>Variables</strong>, then redeploy.</p>`);
 });
 
 app.post("/telegram/webhook", async (req, res) => {
